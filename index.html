@@ -1,0 +1,677 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>N.O.R.A. - AI Assistant</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: radial-gradient(circle at 50% 30%, #06203a, #02070f 70%);
+  color: #7df9ff;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  overflow-x: hidden;
+}
+
+h1 {
+  letter-spacing: 10px;
+  font-size: 26px;
+  text-shadow: 0 0 14px #00e5ff;
+}
+
+.sub {
+  font-size: 11px;
+  letter-spacing: 3px;
+  opacity: .7;
+  margin: 4px 0 18px;
+  text-align: center;
+}
+
+.reactor {
+  position: relative;
+  width: 230px;
+  height: 230px;
+  margin: 10px 0;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid #00e5ff;
+  box-shadow: 0 0 18px #00e5ff55, inset 0 0 18px #00e5ff33;
+}
+
+.r1 {
+  inset: 0;
+  border-style: dashed;
+  animation: spin 14s linear infinite;
+}
+
+.r2 {
+  inset: 22px;
+  border-width: 4px;
+  border-color: #00b8ff #0000 #00b8ff #0000;
+  animation: spin 6s linear infinite reverse;
+}
+
+.r3 {
+  inset: 48px;
+  border-style: dotted;
+  animation: spin 9s linear infinite;
+}
+
+.core {
+  position: absolute;
+  inset: 78px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #e0ffff, #00e5ff 45%, #005f9e);
+  box-shadow: 0 0 40px #00e5ff;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 65px #00e5ff;
+  }
+}
+
+body.listening .core {
+  background: radial-gradient(circle, #fff, #00ff9d 45%, #00704a);
+  box-shadow: 0 0 60px #00ff9d;
+  animation: pulse .8s infinite;
+}
+
+body.thinking .r1 { animation-duration: 2s; }
+body.thinking .r2 { animation-duration: 1s; }
+body.thinking .r3 { animation-duration: 1.5s; }
+
+body.thinking .core {
+  background: radial-gradient(circle, #fff, #ffb300 45%, #7a4d00);
+  box-shadow: 0 0 55px #ffb300;
+}
+
+body.speaking .core {
+  animation: pulse .5s infinite;
+}
+
+#status {
+  font-size: 14px;
+  letter-spacing: 4px;
+  margin: 8px 0;
+  text-transform: uppercase;
+}
+
+canvas {
+  width: 100%;
+  max-width: 340px;
+  height: 70px;
+}
+
+#msg {
+  margin: 14px 0;
+  padding: 14px;
+  max-width: 340px;
+  width: 100%;
+  border: 1px solid #00e5ff66;
+  border-radius: 12px;
+  background: #00e5ff10;
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 70px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#info {
+  font-size: 11px;
+  opacity: .6;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 14px;
+}
+
+.card {
+  border: 1px solid #00e5ff55;
+  border-radius: 12px;
+  padding: 12px;
+  background: #00e5ff0d;
+  font-size: 12px;
+}
+
+.card b {
+  display: block;
+  font-size: 20px;
+  margin-top: 4px;
+  text-shadow: 0 0 8px #00e5ff;
+}
+
+.btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 340px;
+}
+
+button {
+  background: #00e5ff18;
+  color: #7df9ff;
+  border: 1px solid #00e5ff;
+  border-radius: 22px;
+  padding: 10px 16px;
+  font-size: 13px;
+  box-shadow: 0 0 10px #00e5ff44;
+}
+
+button:active {
+  background: #00e5ff44;
+}
+
+button:disabled {
+  opacity: .5;
+}
+
+.mic {
+  font-size: 16px;
+  padding: 14px 26px;
+}
+
+.mic.on {
+  background: #00ff9d33;
+  border-color: #00ff9d;
+  color: #aaffdf;
+  box-shadow: 0 0 20px #00ff9d;
+}
+</style>
+</head>
+
+<body>
+
+<div id="err" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99;background:#8a0000;color:#fff;font-size:12px;padding:8px"></div>
+
+<h1>N.O.R.A.</h1>
+<div class="sub">NEURAL OPERATIONAL RESPONSIVE ASSISTANT</div>
+
+<div class="reactor">
+  <div class="ring r1"></div>
+  <div class="ring r2"></div>
+  <div class="ring r3"></div>
+  <div class="core"></div>
+</div>
+
+<div id="status">IDLE</div>
+
+<canvas id="wave" width="340" height="70"></canvas>
+
+<div id="msg">Hello Sir! I am NORA, your personal AI assistant. How may I help you today?</div>
+
+<div class="btns" style="margin-bottom:8px">
+  <button id="mic" class="mic">🎤 Bolo</button>
+  <button id="lang">भाषा: हिन्दी</button>
+  <button id="greet">👋 Greeting</button>
+  <button id="voice">🔊 Awaaz: ON</button>
+</div>
+
+<div id="info"></div>
+
+<div class="grid">
+  <div class="card">🕒 TIME<b id="time">--:--</b></div>
+  <div class="card">📅 DATE<b id="date">--</b></div>
+  <div class="card">🔋 BATTERY<b id="bat">--</b></div>
+  <div class="card">📶 NETWORK<b id="net">--</b></div>
+</div>
+
+<div class="btns">
+  <button onclick="setState('idle')">Idle</button>
+  <button onclick="setState('listening')">Listening</button>
+  <button onclick="setState('thinking')">Thinking</button>
+  <button onclick="setState('speaking')">Speaking</button>
+</div>
+
+<script>
+// ===== SCRIPT A: DASHBOARD =====
+
+window.onerror = function(m, s, l) {
+  var e = document.getElementById('err');
+  e.style.display = 'block';
+  e.textContent = 'ERROR: ' + m + ' (line ' + l + ')';
+};
+
+var GREETING = "Hello Sir! I am NORA, your personal AI assistant. How may I help you today?";
+
+var msg = document.getElementById('msg');
+var statusEl = document.getElementById('status');
+
+var state = 'idle';
+
+function say(text) {
+  msg.textContent = text;
+}
+
+function setState(s) {
+  state = s;
+  document.body.className = s;
+  statusEl.textContent = s.toUpperCase();
+}
+
+// Wave animation
+
+var cv = document.getElementById('wave');
+var cx = cv.getContext('2d');
+var tt = 0;
+
+function draw() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+
+  var amp = {
+    idle: 3,
+    listening: 22,
+    thinking: 8,
+    speaking: 28
+  }[state];
+
+  var speed = {
+    idle: 0.03,
+    listening: 0.15,
+    thinking: 0.3,
+    speaking: 0.2
+  }[state];
+
+  cx.strokeStyle = '#00e5ff';
+  cx.lineWidth = 2;
+  cx.shadowColor = '#00e5ff';
+  cx.shadowBlur = 10;
+  cx.beginPath();
+
+  for (var x = 0; x < cv.width; x++) {
+    var y = 35 +
+      Math.sin(x * 0.05 + tt) * amp * Math.sin(x * 0.012) +
+      Math.sin(x * 0.13 + tt * 1.7) * amp * 0.3;
+
+    if (x === 0) cx.moveTo(x, y);
+    else cx.lineTo(x, y);
+  }
+
+  cx.stroke();
+  tt += speed;
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+// Clock and date
+
+function tick() {
+  var d = new Date();
+
+  document.getElementById('time').textContent =
+    d.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+  document.getElementById('date').textContent =
+    d.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short'
+    });
+
+  document.getElementById('net').textContent =
+    navigator.onLine ? 'ONLINE' : 'OFFLINE';
+}
+
+tick();
+setInterval(tick, 1000);
+
+// Battery
+
+if (navigator.getBattery) {
+  navigator.getBattery().then(function(b) {
+    function upd() {
+      document.getElementById('bat').textContent =
+        Math.round(b.level * 100) + '%';
+    }
+
+    upd();
+    b.addEventListener('levelchange', upd);
+
+  }).catch(function() {
+    document.getElementById('bat').textContent = 'N/A';
+  });
+
+} else {
+  document.getElementById('bat').textContent = 'N/A';
+}
+</script>
+
+<script>
+// ===== SCRIPT B: NORA AI + VOICE =====
+
+// आपका Cloudflare Worker URL
+var NORA_API =
+  'https://aged-disk-f3a0.pp9099034.workers.dev/chat';
+
+var voiceOn = true;
+var synth = window.speechSynthesis;
+var voices = [];
+
+var infoEl = document.getElementById('info');
+
+var lang = 'hi-IN';
+var listening = false;
+var processing = false;
+
+var SR =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+var rec = null;
+
+var micBtn = document.getElementById('mic');
+var langBtn = document.getElementById('lang');
+var voiceBtn = document.getElementById('voice');
+
+// Load available voices
+
+function loadVoices() {
+  if (!synth) return;
+
+  voices = synth.getVoices();
+
+  infoEl.textContent = 'Awaazein mili: ' + voices.length;
+}
+
+if (synth) {
+  loadVoices();
+  synth.onvoiceschanged = loadVoices;
+}
+
+// Select voice
+
+function pickVoice(l) {
+  var code = l.toLowerCase();
+  var found = null;
+
+  for (var k = 0; k < voices.length; k++) {
+    if (
+      voices[k].lang.replace('_', '-').toLowerCase() === code
+    ) {
+      found = voices[k];
+      break;
+    }
+  }
+
+  if (!found) {
+    for (var j = 0; j < voices.length; j++) {
+      if (
+        voices[j].lang.toLowerCase().indexOf(code.slice(0, 2)) === 0
+      ) {
+        found = voices[j];
+        break;
+      }
+    }
+  }
+
+  return found;
+}
+
+// Speak AI response
+
+function speak(text, l) {
+  if (!synth || !voiceOn) {
+    setState('idle');
+    return;
+  }
+
+  synth.cancel();
+
+  var u = new SpeechSynthesisUtterance(text);
+
+  u.lang = l;
+
+  var v = pickVoice(l);
+
+  if (v) u.voice = v;
+
+  u.rate = 1;
+  u.pitch = 1.05;
+
+  u.onstart = function() {
+    setState('speaking');
+  };
+
+  u.onend = function() {
+    if (state === 'speaking') {
+      setState('idle');
+    }
+  };
+
+  u.onerror = function() {
+    if (state === 'speaking') {
+      setState('idle');
+    }
+  };
+
+  synth.speak(u);
+}
+
+// Connect to Cloudflare AI
+
+async function askNora(text) {
+  var response = await fetch(NORA_API, {
+    method: 'POST',
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      message: text,
+      language: lang === 'hi-IN' ? 'hi' : 'en'
+    })
+  });
+
+  var data = await response.json();
+
+  if (!response.ok || !data.success || !data.reply) {
+    throw new Error(
+      data.error || 'NORA AI response nahi mila.'
+    );
+  }
+
+  return data.reply;
+}
+
+// Handle final voice question
+
+async function processQuestion(text) {
+  if (processing) return;
+
+  processing = true;
+  setState('thinking');
+  say('NORA AI soch rahi hai, Sir...');
+
+  try {
+    var answer = await askNora(text);
+
+    say(answer);
+    speak(answer, lang);
+
+  } catch (error) {
+    console.error('NORA AI Error:', error);
+
+    say(
+      'Sir, NORA AI se connection nahi ho paaya. Internet check karke dobara try karein.'
+    );
+
+    setState('idle');
+
+  } finally {
+    processing = false;
+  }
+}
+
+// Microphone setup
+
+if (!SR) {
+
+  say('Sir, is browser mein mic support nahi hai. Chrome mein kholiye.');
+  micBtn.disabled = true;
+
+} else {
+
+  rec = new SR();
+
+  rec.interimResults = true;
+  rec.continuous = false;
+
+  rec.onstart = function() {
+    listening = true;
+
+    setState('listening');
+    micBtn.classList.add('on');
+
+    say('Sun rahi hoon, Sir...');
+  };
+
+  rec.onresult = function(e) {
+    var text = '';
+
+    for (var k = e.resultIndex; k < e.results.length; k++) {
+      text += e.results[k][0].transcript;
+    }
+
+    say('🎤 ' + text);
+
+    if (e.results[e.results.length - 1].isFinal) {
+      processQuestion(text.trim());
+    }
+  };
+
+  rec.onerror = function(e) {
+    var messages = {
+      'not-allowed':
+        'Sir, mic ki permission nahi mili. Allow dabayein.',
+
+      'no-speech':
+        'Sir, kuch sunai nahi diya. Dobara try karein.',
+
+      'network':
+        'Sir, internet check karein.',
+
+      'audio-capture':
+        'Sir, mic nahi mila.'
+    };
+
+    say(messages[e.error] || ('Error: ' + e.error));
+
+    setState('idle');
+  };
+
+  rec.onend = function() {
+    listening = false;
+
+    micBtn.classList.remove('on');
+
+    if (state === 'listening') {
+      setState('idle');
+    }
+  };
+}
+
+// Mic button
+
+micBtn.onclick = function() {
+  if (!rec || processing) return;
+
+  if (synth) synth.cancel();
+
+  if (listening) {
+    rec.stop();
+    return;
+  }
+
+  rec.lang = lang;
+
+  try {
+    rec.start();
+
+  } catch (err) {
+    say('Microphone error: ' + err.message);
+  }
+};
+
+// Hindi / English toggle
+
+langBtn.onclick = function() {
+  if (lang === 'hi-IN') {
+
+    lang = 'en-IN';
+    langBtn.textContent = 'Language: English';
+
+  } else {
+
+    lang = 'hi-IN';
+    langBtn.textContent = 'भाषा: हिन्दी';
+  }
+};
+
+// Greeting button
+
+document.getElementById('greet').onclick = function() {
+  if (!synth) {
+    say('Sir, is browser mein awaaz support nahi hai.');
+    return;
+  }
+
+  loadVoices();
+
+  say(GREETING);
+
+  speak(GREETING, 'en-IN');
+};
+
+// Voice ON / OFF
+
+voiceBtn.onclick = function() {
+  voiceOn = !voiceOn;
+
+  voiceBtn.textContent = voiceOn
+    ? '🔊 Awaaz: ON'
+    : '🔇 Awaaz: OFF';
+
+  if (!voiceOn && synth) {
+    synth.cancel();
+    setState('idle');
+  }
+};
+
+</script>
+
+</body>
+</html>
