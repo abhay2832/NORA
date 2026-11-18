@@ -168,7 +168,7 @@ var voices = [];
 var lang = 'hi-IN';
 var listening = false;
 var processing = false;
-var history = [];   // pichli baatein (context)
+var chatHistory = [];   // pichli baatein (context)
 
 var chat = document.getElementById('chat');
 var questionInput = document.getElementById('question');
@@ -243,7 +243,7 @@ async function askNora(text) {
     body: JSON.stringify({
       message: text,
       language: lang === 'hi-IN' ? 'hi' : 'en',
-      history: history.slice(-10)
+      history: chatHistory.slice(-10)
     })
   });
 
@@ -280,9 +280,9 @@ async function processQuestion(text) {
     addMessage(answer, 'nora');
 
     // Baat-cheet yaad rakhna
-    history.push({ role: 'user', text: text });
-    history.push({ role: 'model', text: answer });
-    if (history.length > 20) history = history.slice(-20);
+    chatHistory.push({ role: 'user', text: text });
+    chatHistory.push({ role: 'model', text: answer });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
 
     infoEl.textContent = 'NORA ने उत्तर दे दिया है।';
     speak(answer, lang);
@@ -291,7 +291,7 @@ async function processQuestion(text) {
     console.error('NORA AI Error:', error);
     pending.remove();
     addMessage('क्षमा कीजिए Sir, अभी AI सेवा से संपर्क नहीं हो पाया। कृपया इंटरनेट जाँचकर दोबारा प्रयास करें।', 'nora');
-    infoEl.textContent = 'AI connection error.';
+    infoEl.textContent = 'AI error: ' + (error && error.message ? error.message : error);
     setState('idle');
 
   } finally {
@@ -405,7 +405,7 @@ voiceBtn.addEventListener('click', function() {
 // Nayi baatcheet: history aur chat saaf
 document.getElementById('reset').addEventListener('click', function() {
   if (synth) synth.cancel();
-  history = [];
+  chatHistory = [];
   chat.innerHTML = '';
   addMessage('नई बातचीत शुरू हो गई, Sir। बताइए, मैं क्या कर सकती हूँ?', 'nora');
   infoEl.textContent = 'पुरानी बातें हटा दी गईं।';
