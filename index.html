@@ -1,212 +1,51 @@
-
 <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>N.O.R.A. - AI Assistant</title>
+<title>N.O.R.A. - Personal AI Assistant</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background: radial-gradient(circle at 50% 30%, #06203a, #02070f 70%);
-  color: #7df9ff;
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 16px;
-  overflow-x: hidden;
-}
-
-h1 {
-  letter-spacing: 10px;
-  font-size: 26px;
-  text-shadow: 0 0 14px #00e5ff;
-}
-
-.sub {
-  font-size: 11px;
-  letter-spacing: 3px;
-  opacity: .7;
-  margin: 4px 0 18px;
-  text-align: center;
-}
-
-.reactor {
-  position: relative;
-  width: 230px;
-  height: 230px;
-  margin: 10px 0;
-}
-
-.ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 2px solid #00e5ff;
-  box-shadow: 0 0 18px #00e5ff55, inset 0 0 18px #00e5ff33;
-}
-
-.r1 {
-  inset: 0;
-  border-style: dashed;
-  animation: spin 14s linear infinite;
-}
-
-.r2 {
-  inset: 22px;
-  border-width: 4px;
-  border-color: #00b8ff #0000 #00b8ff #0000;
-  animation: spin 6s linear infinite reverse;
-}
-
-.r3 {
-  inset: 48px;
-  border-style: dotted;
-  animation: spin 9s linear infinite;
-}
-
-.core {
-  position: absolute;
-  inset: 78px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #e0ffff, #00e5ff 45%, #005f9e);
-  box-shadow: 0 0 40px #00e5ff;
-  animation: pulse 3s ease-in-out infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  50% {
-    transform: scale(1.08);
-    box-shadow: 0 0 65px #00e5ff;
-  }
-}
-
-body.listening .core {
-  background: radial-gradient(circle, #fff, #00ff9d 45%, #00704a);
-  box-shadow: 0 0 60px #00ff9d;
-  animation: pulse .8s infinite;
-}
-
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: radial-gradient(circle at 50% 25%, #06203a, #02070f 70%); color: #7df9ff; font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 16px 30px; overflow-x: hidden; }
+h1 { letter-spacing: 10px; font-size: 26px; text-shadow: 0 0 14px #00e5ff; }
+.sub { font-size: 10px; letter-spacing: 2px; opacity: .7; margin: 5px 0 12px; text-align: center; }
+.reactor { position: relative; width: 190px; height: 190px; margin: 8px 0; }
+.ring { position: absolute; border-radius: 50%; border: 2px solid #00e5ff; box-shadow: 0 0 18px #00e5ff55, inset 0 0 18px #00e5ff33; }
+.r1 { inset: 0; border-style: dashed; animation: spin 14s linear infinite; }
+.r2 { inset: 20px; border-width: 4px; border-color: #00b8ff #0000 #00b8ff #0000; animation: spin 6s linear infinite reverse; }
+.r3 { inset: 42px; border-style: dotted; animation: spin 9s linear infinite; }
+.core { position: absolute; inset: 65px; border-radius: 50%; background: radial-gradient(circle, #e0ffff, #00e5ff 45%, #005f9e); box-shadow: 0 0 40px #00e5ff; animation: pulse 3s ease-in-out infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { transform: scale(1.08); box-shadow: 0 0 65px #00e5ff; } }
+body.listening .core { background: radial-gradient(circle, #fff, #00ff9d 45%, #00704a); box-shadow: 0 0 60px #00ff9d; animation: pulse .8s infinite; }
 body.thinking .r1 { animation-duration: 2s; }
 body.thinking .r2 { animation-duration: 1s; }
 body.thinking .r3 { animation-duration: 1.5s; }
-
-body.thinking .core {
-  background: radial-gradient(circle, #fff, #ffb300 45%, #7a4d00);
-  box-shadow: 0 0 55px #ffb300;
-}
-
-body.speaking .core {
-  animation: pulse .5s infinite;
-}
-
-#status {
-  font-size: 14px;
-  letter-spacing: 4px;
-  margin: 8px 0;
-  text-transform: uppercase;
-}
-
-canvas {
-  width: 100%;
-  max-width: 340px;
-  height: 70px;
-}
-
-#msg {
-  margin: 14px 0;
-  padding: 14px;
-  max-width: 340px;
-  width: 100%;
-  border: 1px solid #00e5ff66;
-  border-radius: 12px;
-  background: #00e5ff10;
-  font-size: 15px;
-  line-height: 1.5;
-  min-height: 70px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-#info {
-  font-size: 11px;
-  opacity: .6;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  width: 100%;
-  max-width: 340px;
-  margin-bottom: 14px;
-}
-
-.card {
-  border: 1px solid #00e5ff55;
-  border-radius: 12px;
-  padding: 12px;
-  background: #00e5ff0d;
-  font-size: 12px;
-}
-
-.card b {
-  display: block;
-  font-size: 20px;
-  margin-top: 4px;
-  text-shadow: 0 0 8px #00e5ff;
-}
-
-.btns {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 340px;
-}
-
-button {
-  background: #00e5ff18;
-  color: #7df9ff;
-  border: 1px solid #00e5ff;
-  border-radius: 22px;
-  padding: 10px 16px;
-  font-size: 13px;
-  box-shadow: 0 0 10px #00e5ff44;
-}
-
-button:active {
-  background: #00e5ff44;
-}
-
-button:disabled {
-  opacity: .5;
-}
-
-.mic {
-  font-size: 16px;
-  padding: 14px 26px;
-}
-
-.mic.on {
-  background: #00ff9d33;
-  border-color: #00ff9d;
-  color: #aaffdf;
-  box-shadow: 0 0 20px #00ff9d;
-}
+body.thinking .core { background: radial-gradient(circle, #fff, #ffb300 45%, #7a4d00); box-shadow: 0 0 55px #ffb300; }
+body.speaking .core { animation: pulse .5s infinite; }
+#status { font-size: 12px; letter-spacing: 4px; margin: 5px 0; text-transform: uppercase; }
+canvas { width: 100%; max-width: 340px; height: 55px; }
+#info { font-size: 11px; opacity: .65; margin: 8px 0; text-align: center; }
+.chat { width: 100%; max-width: 420px; height: 310px; overflow-y: auto; border: 1px solid #00e5ff55; border-radius: 14px; padding: 12px; background: #00101d99; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+.message { max-width: 90%; padding: 11px 13px; border-radius: 13px; font-size: 14px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.message.user { align-self: flex-end; color: #e7ffff; background: #006d8888; border: 1px solid #00e5ff66; border-bottom-right-radius: 3px; }
+.message.nora { align-self: flex-start; color: #a8faff; background: #00e5ff12; border: 1px solid #00e5ff55; border-bottom-left-radius: 3px; }
+.message-label { font-size: 10px; opacity: .65; margin-bottom: 4px; letter-spacing: 1px; }
+.composer { width: 100%; max-width: 420px; display: flex; align-items: center; gap: 7px; margin-top: 12px; padding: 7px; border: 1px solid #00e5ff88; border-radius: 30px; background: #001522; box-shadow: 0 0 14px #00e5ff22; }
+#question { min-width: 0; flex: 1; background: transparent; color: #dfffff; border: none; outline: none; padding: 10px 8px; font-size: 14px; }
+#question::placeholder { color: #7df9ff88; }
+button { background: #00e5ff18; color: #7df9ff; border: 1px solid #00e5ff; border-radius: 22px; padding: 10px 13px; font-size: 13px; box-shadow: 0 0 10px #00e5ff33; cursor: pointer; }
+button:active { background: #00e5ff44; }
+button:disabled { opacity: .45; }
+#send { background: #00b9d533; font-size: 17px; padding: 9px 14px; }
+#mic { font-size: 18px; padding: 9px 12px; }
+#mic.on { background: #00ff9d33; border-color: #00ff9d; color: #aaffdf; box-shadow: 0 0 20px #00ff9d; }
+.controls { display: flex; justify-content: center; gap: 9px; flex-wrap: wrap; margin: 12px 0; width: 100%; max-width: 420px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 420px; margin: 12px 0; }
+.card { border: 1px solid #00e5ff55; border-radius: 12px; padding: 12px; background: #00e5ff0d; font-size: 12px; }
+.card b { display: block; font-size: 20px; margin-top: 4px; text-shadow: 0 0 8px #00e5ff; }
+.footer { font-size: 10px; opacity: .45; margin-top: 14px; text-align: center; }
 </style>
 </head>
 
@@ -226,18 +65,29 @@ button:disabled {
 
 <div id="status">IDLE</div>
 
-<canvas id="wave" width="340" height="70"></canvas>
+<canvas id="wave" width="340" height="55"></canvas>
 
-<div id="msg">Hello Sir! I am NORA, your personal AI assistant. How may I help you today?</div>
-
-<div class="btns" style="margin-bottom:8px">
-  <button id="mic" class="mic">🎤 Bolo</button>
-  <button id="lang">भाषा: हिन्दी</button>
-  <button id="greet">👋 Greeting</button>
-  <button id="voice">🔊 Awaaz: ON</button>
+<div class="chat" id="chat">
+  <div class="message nora">
+    <div class="message-label">N.O.R.A.</div>
+    नमस्कार Sir! मैं आपकी व्यक्तिगत AI सहायक हूँ। बताइए, मैं आपकी क्या सहायता कर सकती हूँ?
+  </div>
 </div>
 
-<div id="info"></div>
+<form class="composer" id="chatForm">
+  <input id="question" type="text" placeholder="यहाँ अपना संदेश लिखें..." autocomplete="off" required>
+  <button type="button" id="mic">🎤</button>
+  <button type="submit" id="send">➤</button>
+</form>
+
+<div class="controls">
+  <button id="lang">भाषा: हिन्दी</button>
+  <button id="voice">🔊 आवाज़: ON</button>
+  <button id="greet">👋 Greeting</button>
+  <button id="reset">🧹 नई बातचीत</button>
+</div>
+
+<div id="info">NORA तैयार है, Sir.</div>
 
 <div class="grid">
   <div class="card">🕒 TIME<b id="time">--:--</b></div>
@@ -246,40 +96,24 @@ button:disabled {
   <div class="card">📶 NETWORK<b id="net">--</b></div>
 </div>
 
-<div class="btns">
-  <button onclick="setState('idle')">Idle</button>
-  <button onclick="setState('listening')">Listening</button>
-  <button onclick="setState('thinking')">Thinking</button>
-  <button onclick="setState('speaking')">Speaking</button>
-</div>
+<div class="footer">N.O.R.A. PERSONAL AI ASSISTANT</div>
 
 <script>
-// ===== SCRIPT A: DASHBOARD =====
-
+// ===== ERROR HANDLING =====
 window.onerror = function(m, s, l) {
   var e = document.getElementById('err');
   e.style.display = 'block';
   e.textContent = 'ERROR: ' + m + ' (line ' + l + ')';
 };
 
-var GREETING = "Hello Sir! I am NORA, your personal AI assistant. How may I help you today?";
-
-var msg = document.getElementById('msg');
-var statusEl = document.getElementById('status');
-
+// ===== DASHBOARD =====
 var state = 'idle';
-
-function say(text) {
-  msg.textContent = text;
-}
 
 function setState(s) {
   state = s;
   document.body.className = s;
-  statusEl.textContent = s.toUpperCase();
+  document.getElementById('status').textContent = s.toUpperCase();
 }
-
-// Wave animation
 
 var cv = document.getElementById('wave');
 var cx = cv.getContext('2d');
@@ -287,390 +121,296 @@ var tt = 0;
 
 function draw() {
   cx.clearRect(0, 0, cv.width, cv.height);
-
-  var amp = {
-    idle: 3,
-    listening: 22,
-    thinking: 8,
-    speaking: 28
-  }[state];
-
-  var speed = {
-    idle: 0.03,
-    listening: 0.15,
-    thinking: 0.3,
-    speaking: 0.2
-  }[state];
-
+  var amp = { idle: 3, listening: 22, thinking: 8, speaking: 28 }[state] || 3;
+  var speed = { idle: 0.03, listening: 0.15, thinking: 0.3, speaking: 0.2 }[state] || 0.03;
   cx.strokeStyle = '#00e5ff';
   cx.lineWidth = 2;
   cx.shadowColor = '#00e5ff';
   cx.shadowBlur = 10;
   cx.beginPath();
-
   for (var x = 0; x < cv.width; x++) {
-    var y = 35 +
-      Math.sin(x * 0.05 + tt) * amp * Math.sin(x * 0.012) +
-      Math.sin(x * 0.13 + tt * 1.7) * amp * 0.3;
-
-    if (x === 0) cx.moveTo(x, y);
-    else cx.lineTo(x, y);
+    var y = 27 + Math.sin(x * 0.05 + tt) * amp * Math.sin(x * 0.012) + Math.sin(x * 0.13 + tt * 1.7) * amp * 0.3;
+    if (x === 0) cx.moveTo(x, y); else cx.lineTo(x, y);
   }
-
   cx.stroke();
   tt += speed;
   requestAnimationFrame(draw);
 }
-
 draw();
-
-// Clock and date
 
 function tick() {
   var d = new Date();
-
-  document.getElementById('time').textContent =
-    d.toLocaleTimeString('en-IN', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-  document.getElementById('date').textContent =
-    d.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short'
-    });
-
-  document.getElementById('net').textContent =
-    navigator.onLine ? 'ONLINE' : 'OFFLINE';
+  document.getElementById('time').textContent = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('date').textContent = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  document.getElementById('net').textContent = navigator.onLine ? 'ONLINE' : 'OFFLINE';
 }
-
 tick();
 setInterval(tick, 1000);
 
-// Battery
-
 if (navigator.getBattery) {
   navigator.getBattery().then(function(b) {
-    function upd() {
-      document.getElementById('bat').textContent =
-        Math.round(b.level * 100) + '%';
-    }
-
+    function upd() { document.getElementById('bat').textContent = Math.round(b.level * 100) + '%'; }
     upd();
     b.addEventListener('levelchange', upd);
-
   }).catch(function() {
     document.getElementById('bat').textContent = 'N/A';
   });
-
 } else {
   document.getElementById('bat').textContent = 'N/A';
 }
-</script>
 
-<script>
-// ===== SCRIPT B: NORA AI + VOICE =====
-
-// आपका Cloudflare Worker URL
-var NORA_API =
-  'https://aged-disk-f3a0.pp9099034.workers.dev/chat';
+// ===== NORA AI AND CHAT =====
+var NORA_API = 'https://aged-disk-f3a0.pp9099034.workers.dev/chat';
 
 var voiceOn = true;
 var synth = window.speechSynthesis;
 var voices = [];
-
-var infoEl = document.getElementById('info');
-
 var lang = 'hi-IN';
 var listening = false;
 var processing = false;
+var history = [];   // pichli baatein (context)
 
-var SR =
-  window.SpeechRecognition ||
-  window.webkitSpeechRecognition;
-
-var rec = null;
-
+var chat = document.getElementById('chat');
+var questionInput = document.getElementById('question');
+var form = document.getElementById('chatForm');
 var micBtn = document.getElementById('mic');
 var langBtn = document.getElementById('lang');
 var voiceBtn = document.getElementById('voice');
+var infoEl = document.getElementById('info');
 
-// Load available voices
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var rec = null;
+
+function addMessage(text, type) {
+  var bubble = document.createElement('div');
+  bubble.className = 'message ' + type;
+  var label = document.createElement('div');
+  label.className = 'message-label';
+  label.textContent = type === 'user' ? 'SIR' : 'N.O.R.A.';
+  var content = document.createElement('div');
+  content.textContent = text;
+  bubble.appendChild(label);
+  bubble.appendChild(content);
+  chat.appendChild(bubble);
+  chat.scrollTop = chat.scrollHeight;
+  return bubble;
+}
 
 function loadVoices() {
   if (!synth) return;
-
   voices = synth.getVoices();
-
-  infoEl.textContent = 'Awaazein mili: ' + voices.length;
 }
-
 if (synth) {
   loadVoices();
   synth.onvoiceschanged = loadVoices;
 }
 
-// Select voice
-
-function pickVoice(l) {
-  var code = l.toLowerCase();
-  var found = null;
-
-  for (var k = 0; k < voices.length; k++) {
-    if (
-      voices[k].lang.replace('_', '-').toLowerCase() === code
-    ) {
-      found = voices[k];
-      break;
-    }
+function pickVoice(language) {
+  if (!synth) return null;
+  var prefix = language.slice(0, 2).toLowerCase();
+  for (var i = 0; i < voices.length; i++) {
+    if (voices[i].lang.replace('_', '-').toLowerCase() === language.toLowerCase()) return voices[i];
   }
-
-  if (!found) {
-    for (var j = 0; j < voices.length; j++) {
-      if (
-        voices[j].lang.toLowerCase().indexOf(code.slice(0, 2)) === 0
-      ) {
-        found = voices[j];
-        break;
-      }
-    }
+  for (var j = 0; j < voices.length; j++) {
+    if (voices[j].lang.toLowerCase().startsWith(prefix)) return voices[j];
   }
-
-  return found;
+  return null;
 }
 
-// Speak AI response
-
-function speak(text, l) {
+function speak(text, language) {
   if (!synth || !voiceOn) {
     setState('idle');
     return;
   }
-
   synth.cancel();
-
-  var u = new SpeechSynthesisUtterance(text);
-
-  u.lang = l;
-
-  var v = pickVoice(l);
-
-  if (v) u.voice = v;
-
-  u.rate = 1;
-  u.pitch = 1.05;
-
-  u.onstart = function() {
-    setState('speaking');
-  };
-
-  u.onend = function() {
-    if (state === 'speaking') {
-      setState('idle');
-    }
-  };
-
-  u.onerror = function() {
-    if (state === 'speaking') {
-      setState('idle');
-    }
-  };
-
-  synth.speak(u);
+  var utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = language;
+  var selectedVoice = pickVoice(language);
+  if (selectedVoice) utterance.voice = selectedVoice;
+  utterance.rate = 0.92;
+  utterance.pitch = 1.0;
+  utterance.onstart = function() { setState('speaking'); };
+  utterance.onend = function() { if (state === 'speaking') setState('idle'); };
+  utterance.onerror = function() { if (state === 'speaking') setState('idle'); };
+  synth.speak(utterance);
 }
 
-// Connect to Cloudflare AI
-
+// Question ko Cloudflare AI ke paas bhejna (history ke saath)
 async function askNora(text) {
   var response = await fetch(NORA_API, {
     method: 'POST',
-
-    headers: {
-      'Content-Type': 'application/json'
-    },
-
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       message: text,
-      language: lang === 'hi-IN' ? 'hi' : 'en'
+      language: lang === 'hi-IN' ? 'hi' : 'en',
+      history: history.slice(-10)
     })
   });
 
   var data = await response.json();
 
   if (!response.ok || !data.success || !data.reply) {
-    throw new Error(
-      data.error || 'NORA AI response nahi mila.'
-    );
+    throw new Error(data.error || 'NORA AI response nahi mila.');
   }
-
   return data.reply;
 }
 
-// Handle final voice question
-
 async function processQuestion(text) {
-  if (processing) return;
+  text = text.trim();
+  if (!text || processing) return;
+
+  if (synth) synth.cancel();
+
+  addMessage(text, 'user');
 
   processing = true;
+  questionInput.disabled = true;
+  micBtn.disabled = true;
+  document.getElementById('send').disabled = true;
+
   setState('thinking');
-  say('NORA AI soch rahi hai, Sir...');
+  infoEl.textContent = 'NORA आपके प्रश्न पर विचार कर रही है...';
+
+  var pending = addMessage('कृपया प्रतीक्षा करें...', 'nora');
 
   try {
     var answer = await askNora(text);
 
-    say(answer);
+    pending.remove();
+    addMessage(answer, 'nora');
+
+    // Baat-cheet yaad rakhna
+    history.push({ role: 'user', text: text });
+    history.push({ role: 'model', text: answer });
+    if (history.length > 20) history = history.slice(-20);
+
+    infoEl.textContent = 'NORA ने उत्तर दे दिया है।';
     speak(answer, lang);
 
   } catch (error) {
     console.error('NORA AI Error:', error);
-
-    say(
-      'Sir, NORA AI se connection nahi ho paaya. Internet check karke dobara try karein.'
-    );
-
+    pending.remove();
+    addMessage('क्षमा कीजिए Sir, अभी AI सेवा से संपर्क नहीं हो पाया। कृपया इंटरनेट जाँचकर दोबारा प्रयास करें।', 'nora');
+    infoEl.textContent = 'AI connection error.';
     setState('idle');
 
   } finally {
     processing = false;
+    questionInput.disabled = false;
+    micBtn.disabled = false;
+    document.getElementById('send').disabled = false;
+    questionInput.focus();
   }
 }
 
-// Microphone setup
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (processing) return;
+  var text = questionInput.value.trim();
+  if (!text) return;
+  questionInput.value = '';
+  processQuestion(text);
+});
 
+// Microphone
 if (!SR) {
-
-  say('Sir, is browser mein mic support nahi hai. Chrome mein kholiye.');
   micBtn.disabled = true;
-
+  infoEl.textContent = 'इस ब्राउज़र में वॉइस पहचान उपलब्ध नहीं है। Chrome में प्रयास करें।';
 } else {
-
   rec = new SR();
-
   rec.interimResults = true;
   rec.continuous = false;
 
   rec.onstart = function() {
     listening = true;
-
-    setState('listening');
     micBtn.classList.add('on');
-
-    say('Sun rahi hoon, Sir...');
+    setState('listening');
+    infoEl.textContent = 'NORA सुन रही है, Sir...';
   };
 
   rec.onresult = function(e) {
-    var text = '';
-
-    for (var k = e.resultIndex; k < e.results.length; k++) {
-      text += e.results[k][0].transcript;
+    var finalText = '';
+    var interimText = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+      else interimText += e.results[i][0].transcript;
     }
-
-    say('🎤 ' + text);
-
-    if (e.results[e.results.length - 1].isFinal) {
-      processQuestion(text.trim());
-    }
+    if (interimText) infoEl.textContent = 'सुना जा रहा है: ' + interimText;
+    if (finalText.trim()) processQuestion(finalText.trim());
   };
 
   rec.onerror = function(e) {
-    var messages = {
-      'not-allowed':
-        'Sir, mic ki permission nahi mili. Allow dabayein.',
-
-      'no-speech':
-        'Sir, kuch sunai nahi diya. Dobara try karein.',
-
-      'network':
-        'Sir, internet check karein.',
-
-      'audio-capture':
-        'Sir, mic nahi mila.'
+    var errors = {
+      'not-allowed': 'Sir, माइक्रोफ़ोन की अनुमति दीजिए।',
+      'no-speech': 'कोई आवाज़ सुनाई नहीं दी। दोबारा प्रयास करें।',
+      'network': 'इंटरनेट कनेक्शन जाँचिए।',
+      'audio-capture': 'माइक्रोफ़ोन उपलब्ध नहीं है।'
     };
-
-    say(messages[e.error] || ('Error: ' + e.error));
-
+    infoEl.textContent = errors[e.error] || ('Microphone error: ' + e.error);
     setState('idle');
   };
 
   rec.onend = function() {
     listening = false;
-
     micBtn.classList.remove('on');
-
-    if (state === 'listening') {
-      setState('idle');
-    }
+    if (state === 'listening') setState('idle');
   };
 }
 
-// Mic button
-
-micBtn.onclick = function() {
+micBtn.addEventListener('click', function() {
   if (!rec || processing) return;
-
+  if (listening) { rec.stop(); return; }
   if (synth) synth.cancel();
-
-  if (listening) {
-    rec.stop();
-    return;
-  }
-
   rec.lang = lang;
-
   try {
     rec.start();
-
-  } catch (err) {
-    say('Microphone error: ' + err.message);
+  } catch (error) {
+    infoEl.textContent = 'माइक्रोफ़ोन शुरू नहीं हो पाया। पुनः प्रयास करें।';
   }
-};
+});
 
-// Hindi / English toggle
-
-langBtn.onclick = function() {
+langBtn.addEventListener('click', function() {
   if (lang === 'hi-IN') {
-
     lang = 'en-IN';
     langBtn.textContent = 'Language: English';
-
+    questionInput.placeholder = 'Type your message...';
+    infoEl.textContent = 'English mode selected.';
   } else {
-
     lang = 'hi-IN';
     langBtn.textContent = 'भाषा: हिन्दी';
+    questionInput.placeholder = 'यहाँ अपना संदेश लिखें...';
+    infoEl.textContent = 'हिन्दी मोड चुना गया है।';
   }
-};
+  if (rec) rec.lang = lang;
+});
 
-// Greeting button
+document.getElementById('greet').addEventListener('click', function() {
+  var greeting = lang === 'hi-IN'
+    ? 'नमस्कार Sir! मैं NORA हूँ। मैं आपकी सहायता के लिए तैयार हूँ।'
+    : 'Hello Sir! I am NORA, your personal AI assistant. How may I help you today?';
+  addMessage(greeting, 'nora');
+  speak(greeting, lang);
+});
 
-document.getElementById('greet').onclick = function() {
-  if (!synth) {
-    say('Sir, is browser mein awaaz support nahi hai.');
-    return;
-  }
-
-  loadVoices();
-
-  say(GREETING);
-
-  speak(GREETING, 'en-IN');
-};
-
-// Voice ON / OFF
-
-voiceBtn.onclick = function() {
+voiceBtn.addEventListener('click', function() {
   voiceOn = !voiceOn;
-
-  voiceBtn.textContent = voiceOn
-    ? '🔊 Awaaz: ON'
-    : '🔇 Awaaz: OFF';
-
+  voiceBtn.textContent = voiceOn ? '🔊 आवाज़: ON' : '🔇 आवाज़: OFF';
   if (!voiceOn && synth) {
     synth.cancel();
     setState('idle');
   }
-};
+  infoEl.textContent = voiceOn ? 'आवाज़ चालू है।' : 'आवाज़ बंद है। उत्तर लिखकर दिखाई देंगे।';
+});
 
+// Nayi baatcheet: history aur chat saaf
+document.getElementById('reset').addEventListener('click', function() {
+  if (synth) synth.cancel();
+  history = [];
+  chat.innerHTML = '';
+  addMessage('नई बातचीत शुरू हो गई, Sir। बताइए, मैं क्या कर सकती हूँ?', 'nora');
+  infoEl.textContent = 'पुरानी बातें हटा दी गईं।';
+  setState('idle');
+});
 </script>
 
 </body>
