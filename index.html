@@ -2,209 +2,522 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#031323">
-<title>N.O.R.A. — Neural Operational Responsive Assistant</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>N.O.R.A. - Personal AI Assistant</title>
+
 <style>
-:root{--cyan:#00eaff;--blue:#168cff;--bg:#020b16;--panel:rgba(4,25,45,.88);--line:rgba(0,225,255,.48);--muted:#9dc9dc}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 28% 40%,#07335a 0%,#031526 42%,#010710 100%);color:#e9fbff;font-family:Arial,"Noto Sans Devanagari",sans-serif;min-height:100vh}
-.app{max-width:1100px;margin:auto;padding:14px;display:grid;grid-template-columns:minmax(220px, .8fr) minmax(300px,1.2fr);gap:14px}
-header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:18px;padding:12px 18px;background:var(--panel);box-shadow:0 0 22px #00bfff25}
-.brand{font-size:clamp(25px,5vw,38px);font-weight:800;letter-spacing:5px;color:var(--cyan);text-shadow:0 0 15px #00cfff}
-.sub{font-size:10px;letter-spacing:1.5px;color:#a7d8e9}.online{color:#6bff9c;font-size:13px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 0 24px #00cfff18;padding:14px;min-width:0}
-.avatarPanel{display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-height:570px;overflow:hidden;position:relative}
-
-.avatarTop{position:relative;z-index:3;display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:2px;color:#a9efff}
-.liveDot{width:7px;height:7px;border-radius:50%;background:#6bff9c;box-shadow:0 0 12px #6bff9c}
-.avatarStage{position:relative;z-index:1;width:min(100%,390px);height:470px;perspective:1000px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:20px}
-.avatarHalo{position:absolute;width:84%;height:88%;border-radius:48% 48% 35% 35%;border:1px solid #00dfff88;box-shadow:0 0 28px #00cfff44,inset 0 0 28px #00cfff22;transform:rotateY(-7deg);animation:haloFloat 5s ease-in-out infinite}
-.avatarPhoto{position:relative;z-index:2;display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:50% 22%;border-radius:18px;transform:rotateY(-5deg) scale(.96);transform-style:preserve-3d;box-shadow:18px 20px 38px #000a,0 0 28px #00dfff44;transition:filter .35s,transform .35s;mask-image:linear-gradient(to bottom,#000 0%,#000 88%,transparent 100%)}
-.avatarStage.hologram .avatarPhoto{filter:sepia(.15) hue-rotate(145deg) saturate(1.65) brightness(.82) contrast(1.12);transform:rotateY(5deg) scale(.94);box-shadow:0 0 35px #00eaff88, inset 0 0 30px #00eaff}
-.avatarStage.speaking .avatarPhoto{animation:portraitSpeak 1.15s ease-in-out infinite alternate}
-.avatarStage.listening .avatarPhoto{filter:brightness(1.08) drop-shadow(0 0 16px #00ffb0);transform:rotateY(0deg) scale(.97)}
-.scanLine{display:none;position:absolute;z-index:3;left:4%;right:4%;height:2px;top:10%;background:#8ffaff;box-shadow:0 0 12px #00eaff;opacity:.6}
-.avatarStage.hologram .scanLine{display:block;animation:scan 3s linear infinite}
-.avatarHint{position:relative;z-index:2;color:#72bccc;font-size:9px;letter-spacing:1.5px;margin-top:9px;text-align:center}
-@keyframes haloFloat{0%,100%{transform:rotateY(-7deg) translateY(0)}50%{transform:rotateY(7deg) translateY(-7px)}}
-@keyframes portraitSpeak{from{transform:rotateY(-4deg) scale(.96)}to{transform:rotateY(4deg) scale(.985)}}
-@keyframes scan{from{top:8%}to{top:90%}}
-@media(max-width:720px){.avatarStage{height:390px}.avatarPhoto{object-position:50% 20%}}
-
-.avatarPanel:before{content:"";position:absolute;width:85%;aspect-ratio:1;border:1px solid #00d9ff55;border-radius:50%;bottom:25px;box-shadow:0 0 35px #00cfff35,inset 0 0 35px #00cfff22}
-.avatarWrap{position:relative;z-index:1;width:100%;height:475px;display:flex;align-items:center;justify-content:center}
-.avatarPhoto{max-height:100%;max-width:100%;width:100%;height:100%;object-fit:cover;object-position:50% 28%;border-radius:16px;mask-image:linear-gradient(to bottom,black 84%,transparent 100%);filter:drop-shadow(0 0 18px #00bfff44);transition:opacity .25s}
-.avatarPhoto.talking{animation:talkGlow .8s infinite alternate}
-@keyframes talkGlow{from{filter:drop-shadow(0 0 10px #00cfff55)}to{filter:drop-shadow(0 0 28px #00eaffcc)}}
-.holo{display:none;width:78%;height:390px;position:relative;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#8df7ff;text-shadow:0 0 15px #00eaff}
-.holo .head{width:150px;height:175px;border:3px solid #4ceeff;border-radius:48% 48% 43% 43%;background:linear-gradient(145deg,#b6faff55,#0785b855);box-shadow:0 0 35px #00dfff,inset 0 0 25px #00dfff;position:relative}
-.holo .head:before{content:"";position:absolute;left:27px;right:27px;top:65px;height:9px;border-left:15px solid #b8ffff;border-right:15px solid #b8ffff;filter:drop-shadow(0 0 8px cyan)}
-.holo .body{width:220px;height:180px;border:3px solid #36eaff;border-radius:48% 48% 15% 15%;background:linear-gradient(90deg,#00cfff22,#6dfaff55,#00cfff22);box-shadow:0 0 28px #00dfff}
-.holo .ring{width:260px;height:38px;border:2px solid #00eaff;border-radius:50%;box-shadow:0 0 20px cyan}
-.avatarLabel{position:relative;z-index:2;color:var(--cyan);font-weight:bold;letter-spacing:2px;margin:6px}
-.right{display:flex;flex-direction:column;gap:12px}
-h2{font-size:15px;color:var(--cyan);margin:0 0 10px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-button,select,input{font:inherit}
-button{border:1px solid var(--line);background:#062844;color:#eaffff;border-radius:12px;padding:10px 12px;cursor:pointer}
-button:active{transform:scale(.98)}button.active{background:#075078;box-shadow:0 0 14px #00dfff55}
-select,input{background:#031a2d;color:white;border:1px solid var(--line);border-radius:10px;padding:11px;min-width:0}
-select{flex:1}
-.chat{height:270px;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
-.msg{max-width:92%;padding:11px 13px;border-radius:14px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
-.msg.bot{align-self:flex-start;background:#073452;border:1px solid #0c9bc0}
-.msg.user{align-self:flex-end;background:#06466a;border:1px solid #00cfff}
-.msg small{display:block;color:#75eaff;font-size:10px;margin-bottom:4px}
-.composer{display:flex;gap:7px}.composer input{flex:1;width:100%}.send{min-width:48px;color:var(--cyan);font-size:20px}
-.mic{border-radius:50%;width:48px;height:48px;font-size:19px;color:var(--cyan)}
-.mic.listening{background:#7b1233;box-shadow:0 0 20px #ff386b}
-.status{text-align:center;color:var(--muted);font-size:12px;min-height:18px}
-.footer{grid-column:1/-1;text-align:center;color:#73cce2;font-size:11px;padding:5px}
-.note{font-size:11px;color:#9dc9dc;line-height:1.5}
-@media(max-width:720px){.app{grid-template-columns:1fr;padding:9px}.avatarPanel{min-height:420px}.avatarWrap{height:340px}.avatarPhoto{object-position:50% 25%}.holo{height:300px}.holo .head{width:115px;height:135px}.holo .body{width:180px;height:130px}.chat{height:230px}header{padding:10px}}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: radial-gradient(circle at 50% 25%, #06203a, #02070f 70%); color: #7df9ff; font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 16px 30px; overflow-x: hidden; }
+h1 { letter-spacing: 10px; font-size: 26px; text-shadow: 0 0 14px #00e5ff; }
+.sub { font-size: 10px; letter-spacing: 2px; opacity: .7; margin: 5px 0 12px; text-align: center; }
+.reactor { position: relative; width: 190px; height: 190px; margin: 8px 0; }
+.ring { position: absolute; border-radius: 50%; border: 2px solid #00e5ff; box-shadow: 0 0 18px #00e5ff55, inset 0 0 18px #00e5ff33; }
+.r1 { inset: 0; border-style: dashed; animation: spin 14s linear infinite; }
+.r2 { inset: 20px; border-width: 4px; border-color: #00b8ff #0000 #00b8ff #0000; animation: spin 6s linear infinite reverse; }
+.r3 { inset: 42px; border-style: dotted; animation: spin 9s linear infinite; }
+.core { position: absolute; inset: 65px; border-radius: 50%; background: radial-gradient(circle, #e0ffff, #00e5ff 45%, #005f9e); box-shadow: 0 0 40px #00e5ff; animation: pulse 3s ease-in-out infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { transform: scale(1.08); box-shadow: 0 0 65px #00e5ff; } }
+body.listening .core { background: radial-gradient(circle, #fff, #00ff9d 45%, #00704a); box-shadow: 0 0 60px #00ff9d; animation: pulse .8s infinite; }
+body.thinking .r1 { animation-duration: 2s; }
+body.thinking .r2 { animation-duration: 1s; }
+body.thinking .r3 { animation-duration: 1.5s; }
+body.thinking .core { background: radial-gradient(circle, #fff, #ffb300 45%, #7a4d00); box-shadow: 0 0 55px #ffb300; }
+body.speaking .core { animation: pulse .5s infinite; }
+#status { font-size: 12px; letter-spacing: 4px; margin: 5px 0; text-transform: uppercase; }
+canvas { width: 100%; max-width: 340px; height: 55px; }
+#info { font-size: 11px; opacity: .65; margin: 8px 0; text-align: center; }
+.chat { width: 100%; max-width: 420px; height: 310px; overflow-y: auto; border: 1px solid #00e5ff55; border-radius: 14px; padding: 12px; background: #00101d99; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+.message { max-width: 90%; padding: 11px 13px; border-radius: 13px; font-size: 14px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.message.user { align-self: flex-end; color: #e7ffff; background: #006d8888; border: 1px solid #00e5ff66; border-bottom-right-radius: 3px; }
+.message.nora { align-self: flex-start; color: #a8faff; background: #00e5ff12; border: 1px solid #00e5ff55; border-bottom-left-radius: 3px; }
+.message-label { font-size: 10px; opacity: .65; margin-bottom: 4px; letter-spacing: 1px; }
+.act { display: inline-block; margin-top: 8px; padding: 9px 18px; border: 1px solid #00e5ff; border-radius: 20px; color: #dfffff; background: #00e5ff33; text-decoration: none; font-size: 14px; box-shadow: 0 0 12px #00e5ff55; }
+.composer { width: 100%; max-width: 420px; display: flex; align-items: center; gap: 7px; margin-top: 12px; padding: 7px; border: 1px solid #00e5ff88; border-radius: 30px; background: #001522; box-shadow: 0 0 14px #00e5ff22; }
+#question { min-width: 0; flex: 1; background: transparent; color: #dfffff; border: none; outline: none; padding: 10px 8px; font-size: 14px; }
+#question::placeholder { color: #7df9ff88; }
+button { background: #00e5ff18; color: #7df9ff; border: 1px solid #00e5ff; border-radius: 22px; padding: 10px 13px; font-size: 13px; box-shadow: 0 0 10px #00e5ff33; cursor: pointer; }
+button:active { background: #00e5ff44; }
+button:disabled { opacity: .45; }
+#send { background: #00b9d533; font-size: 17px; padding: 9px 14px; }
+#mic { font-size: 18px; padding: 9px 12px; }
+#mic.on { background: #00ff9d33; border-color: #00ff9d; color: #aaffdf; box-shadow: 0 0 20px #00ff9d; }
+.controls { display: flex; justify-content: center; gap: 9px; flex-wrap: wrap; margin: 12px 0; width: 100%; max-width: 420px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 420px; margin: 12px 0; }
+.card { border: 1px solid #00e5ff55; border-radius: 12px; padding: 12px; background: #00e5ff0d; font-size: 12px; }
+.card b { display: block; font-size: 20px; margin-top: 4px; text-shadow: 0 0 8px #00e5ff; }
+.footer { font-size: 10px; opacity: .45; margin-top: 14px; text-align: center; }
 </style>
 </head>
+
 <body>
-<div class="app">
-<header><div><div class="brand">N.O.R.A.</div><div class="sub">NEURAL OPERATIONAL RESPONSIVE ASSISTANT</div></div><div class="online">● ONLINE</div></header>
-<section class="panel avatarPanel">
-  <div class="avatarTop"><span class="liveDot"></span><span id="avatarState">NORA • READY</span></div>
-  <div class="avatarStage" id="avatarStage">
-    <div class="avatarHalo"></div>
-    <img id="avatarPhoto" class="avatarPhoto" src="nora-realistic.jpg" alt="NORA avatar based on the photo provided">
-    <div class="scanLine"></div>
-    <div id="holoAvatar" class="holo" aria-label="Futuristic hologram style"><div class="head"></div><div class="body"></div><div class="ring"></div></div>
-  </div>
-  <div class="avatarLabel" id="avatarLabel">N.O.R.A. • REALISTIC AVATAR</div>
-  <div class="row" style="position:relative;z-index:2">
-    <button id="realBtn" class="active">Realistic</button><button id="holoBtn">3D Hologram</button>
-  </div>
-  <div class="avatarHint">VOICE INTERACTION • LIVE STATUS ANIMATION</div>
-</section>
-<section class="right">
-  <div class="panel">
-    <h2>CHARACTER & VOICE</h2>
-    <div class="row"><button id="changeChar">Character Change</button><select id="voiceSelect" aria-label="Female voice selection"><option>Voices loading…</option></select></div>
-    <div class="row" style="margin-top:8px"><select id="language"><option value="hi">हिन्दी</option><option value="en">English</option></select><button id="voiceToggle" class="active">आवाज़: ON</button><button id="greet">Greeting</button></div>
-    <p class="note">Voice options aapke Android/Chrome mein installed voices par depend karte hain.</p>
-  </div>
-  <div class="panel">
-    <h2>CONVERSATION</h2>
-    <div id="chat" class="chat" aria-live="polite">
-      <div class="msg bot"><small>N.O.R.A.</small>नमस्कार Sir! मैं NORA हूँ। अब आप मुझसे लिखकर या बोलकर बात कर सकते हैं।</div>
-    </div>
-    <div class="status" id="status">Ready • आपकी सहायता के लिए तैयार</div>
-    <form id="chatForm" class="composer">
-      <input id="question" placeholder="यहाँ अपना संदेश लिखें…" autocomplete="off">
-      <button type="button" id="mic" class="mic" title="Speak">🎙</button>
-      <button class="send" type="submit" title="Send">➤</button>
-    </form>
-  </div>
-  <div class="panel">
-    <h2>QUICK CONTROLS</h2>
-    <div class="row"><button id="stopSpeak">आवाज़ रोकें</button><button id="clearChat">Chat साफ़ करें</button></div>
-    <p class="note">NORA AI backend Cloudflare Worker se connect hota hai. Internet connection zaroori hai.</p>
-  </div>
-</section>
-<div class="footer">N.O.R.A. — Always With You ♥</div>
+
+<div id="err" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99;background:#8a0000;color:#fff;font-size:12px;padding:8px"></div>
+
+<h1>N.O.R.A.</h1>
+<div class="sub">NEURAL OPERATIONAL RESPONSIVE ASSISTANT</div>
+
+<div class="reactor">
+  <div class="ring r1"></div>
+  <div class="ring r2"></div>
+  <div class="ring r3"></div>
+  <div class="core"></div>
 </div>
+
+<div id="status">IDLE</div>
+
+<canvas id="wave" width="340" height="55"></canvas>
+
+<div class="chat" id="chat">
+  <div class="message nora">
+    <div class="message-label">N.O.R.A.</div>
+    नमस्कार Sir! मैं आपकी व्यक्तिगत AI सहायक हूँ। बताइए, मैं आपकी क्या सहायता कर सकती हूँ?
+  </div>
+</div>
+
+<form class="composer" id="chatForm">
+  <input id="question" type="text" placeholder="यहाँ अपना संदेश लिखें..." autocomplete="off" required>
+  <button type="button" id="mic">🎤</button>
+  <button type="submit" id="send">➤</button>
+</form>
+
+<div class="controls">
+  <button id="lang">भाषा: हिन्दी</button>
+  <button id="voice">🔊 आवाज़: ON</button>
+  <button id="greet">👋 Greeting</button>
+  <button id="reset">🧹 नई बातचीत</button>
+</div>
+
+<div id="info">NORA तैयार है, Sir.</div>
+
+<div class="grid">
+  <div class="card">🕒 TIME<b id="time">--:--</b></div>
+  <div class="card">📅 DATE<b id="date">--</b></div>
+  <div class="card">🔋 BATTERY<b id="bat">--</b></div>
+  <div class="card">📶 NETWORK<b id="net">--</b></div>
+</div>
+
+<div class="footer">N.O.R.A. PERSONAL AI ASSISTANT</div>
+
 <script>
-const API_URL = "https://aged-disk-f3a0.pp9099034.workers.dev/chat";
-const $ = id => document.getElementById(id);
-let currentCharacter = "real", voiceOn = true, recognition = null, busy = false, voices = [];
-const synth = window.speechSynthesis;
-
-function setStatus(s){$("status").textContent=s}
-function setAvatarState(s){
-  const stage=$("avatarStage");
-  stage.classList.remove("speaking","listening");
-  if(s==="speaking"||s==="listening")stage.classList.add(s);
-  $("avatarState").textContent="NORA • "+s.toUpperCase();
-}
-function addMessage(text, who){
-  const div=document.createElement("div"); div.className="msg "+who;
-  const label=document.createElement("small"); label.textContent=who==="bot"?"N.O.R.A.":"YOU";
-  const body=document.createElement("span"); body.textContent=text;
-  div.append(label,body); $("chat").appendChild(div); $("chat").scrollTop=$("chat").scrollHeight; return div;
-}
-function setCharacter(type){
-  currentCharacter=type;
-  $("avatarPhoto").style.display="block";
-  $("avatarStage").classList.toggle("hologram",type==="holo");
-  $("holoAvatar").style.display="none";
-  $("realBtn").classList.toggle("active",type==="real");
-  $("holoBtn").classList.toggle("active",type==="holo");
-  $("avatarLabel").textContent=type==="real"?"N.O.R.A. • REALISTIC AVATAR":"N.O.R.A. • FUTURISTIC HOLOGRAM";
-}
-$("realBtn").onclick=()=>setCharacter("real");
-$("holoBtn").onclick=()=>setCharacter("holo");
-$("changeChar").onclick=()=>setCharacter(currentCharacter==="real"?"holo":"real");
-function loadVoices(){
-  if(!synth)return;
-  voices=synth.getVoices();
-  const select=$("voiceSelect"); select.innerHTML="";
-  const femaleHints=/female|woman|girl|zira|heera|priya|aditi|samantha|kavya|neerja/i;
-  const preferred=voices.filter(v=>/hi|en/i.test(v.lang));
-  const candidates=preferred.filter(v=>femaleHints.test(v.name));
-  const list=candidates.length?candidates:preferred;
-  if(!list.length){select.add(new Option("No installed voices found",""));return}
-  list.forEach((v,i)=>select.add(new Option(v.name+" ("+v.lang+")",v.name)));
-  const hindi=list.find(v=>/^hi/i.test(v.lang)); if(hindi)select.value=hindi.name;
-}
-if(synth){loadVoices();synth.onvoiceschanged=loadVoices}
-function selectedVoice(){
-  if(!synth)return null;
-  return voices.find(v=>v.name===$("voiceSelect").value)||voices.find(v=>v.lang.toLowerCase().startsWith($("language").value))||null;
-}
-// NOTE: This browser version animates the portrait while speaking.
-// True 3D head movement and phoneme-accurate lip-sync need a dedicated 3D avatar model/service.
-function speak(text){
-  if(!voiceOn||!synth)return;
-  synth.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  const lang=$("language").value; u.lang=lang==="hi"?"hi-IN":"en-IN";
-  const v=selectedVoice(); if(v){u.voice=v;u.lang=v.lang}
-  u.rate=.92;u.pitch=1.08;
-  u.onstart=()=>{$("avatarPhoto").classList.add("talking");setAvatarState("speaking");setStatus("NORA बोल रही है…")};
-  u.onend=()=>{$("avatarPhoto").classList.remove("talking");setAvatarState("ready");setStatus("Ready")};
-  u.onerror=()=>{$("avatarPhoto").classList.remove("talking");setAvatarState("ready");setStatus("Voice playback error — Android TTS settings जाँचें")};
-  synth.speak(u);
-}
-$("voiceToggle").onclick=()=>{
-  voiceOn=!voiceOn;$("voiceToggle").textContent="आवाज़: "+(voiceOn?"ON":"OFF");
-  $("voiceToggle").classList.toggle("active",voiceOn);if(!voiceOn&&synth)synth.cancel();
+// ===== ERROR HANDLING =====
+window.onerror = function(m, s, l) {
+  var e = document.getElementById('err');
+  e.style.display = 'block';
+  e.textContent = 'ERROR: ' + m + ' (line ' + l + ')';
 };
-$("stopSpeak").onclick=()=>{if(synth)synth.cancel();$("avatarPhoto").classList.remove("talking");setStatus("आवाज़ रोक दी गई")};
-$("greet").onclick=()=>speak($("language").value==="hi"?"नमस्कार Sir! मैं NORA हूँ। बताइए, मैं आपकी क्या सहायता कर सकती हूँ?":"Hello Sir! I am NORA. How can I help you today?");
-$("clearChat").onclick=()=>{$("chat").innerHTML="";addMessage("नमस्कार Sir! मैं NORA हूँ। बताइए, मैं आपकी क्या सहायता कर सकती हूँ?","bot")};
 
-async function askNora(text){
-  if(!text.trim()||busy)return;
-  busy=true;addMessage(text,"user");$("question").value="";setStatus("NORA सोच रही है…");
-  const pending=addMessage("कृपया प्रतीक्षा करें…","bot");
-  try{
-    const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,language:$("language").value==="en"?"en":"hi"})});
-    if(!response.ok)throw new Error("HTTP "+response.status);
-    const data=await response.json();
-    if(!data.success||!data.reply)throw new Error("Invalid response");
-    pending.querySelector("span").textContent=data.reply;
-    setStatus("Ready");speak(data.reply);
-  }catch(err){
-    pending.querySelector("span").textContent="Sir, AI server se connection nahi ho paaya. Internet aur Worker URL check kijiye.";
-    setStatus("Connection error");console.error(err);
-  }finally{busy=false}
+// ===== DASHBOARD =====
+var state = 'idle';
+
+function setState(s) {
+  state = s;
+  document.body.className = s;
+  document.getElementById('status').textContent = s.toUpperCase();
 }
-$("chatForm").addEventListener("submit",e=>{e.preventDefault();askNora($("question").value)});
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(SR){
-  recognition=new SR();recognition.continuous=false;recognition.interimResults=false;
-  recognition.onstart=()=>{$("mic").classList.add("listening");setAvatarState("listening");setStatus("सुन रही हूँ…")};
-  recognition.onresult=e=>{const text=e.results[0][0].transcript;$("question").value=text;askNora(text)};
-  recognition.onerror=e=>setStatus("Mic error: "+e.error+" — अनुमति जाँचें");
-  recognition.onend=()=>{$("mic").classList.remove("listening");if(!busy){setAvatarState("ready");setStatus("Ready")}};
-}else{$("mic").disabled=true;$("mic").title="Speech recognition not supported in this browser"}
-$("mic").onclick=()=>{if(!recognition)return;try{recognition.lang=$("language").value==="hi"?"hi-IN":"en-IN";recognition.start()}catch(e){setStatus("Mic पहले से चालू है")}};
-$("language").onchange=()=>{if(recognition)recognition.lang=$("language").value==="hi"?"hi-IN":"en-IN";loadVoices()};
+
+var cv = document.getElementById('wave');
+var cx = cv.getContext('2d');
+var tt = 0;
+
+function draw() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  var amp = { idle: 3, listening: 22, thinking: 8, speaking: 28 }[state] || 3;
+  var speed = { idle: 0.03, listening: 0.15, thinking: 0.3, speaking: 0.2 }[state] || 0.03;
+  cx.strokeStyle = '#00e5ff';
+  cx.lineWidth = 2;
+  cx.shadowColor = '#00e5ff';
+  cx.shadowBlur = 10;
+  cx.beginPath();
+  for (var x = 0; x < cv.width; x++) {
+    var y = 27 + Math.sin(x * 0.05 + tt) * amp * Math.sin(x * 0.012) + Math.sin(x * 0.13 + tt * 1.7) * amp * 0.3;
+    if (x === 0) cx.moveTo(x, y); else cx.lineTo(x, y);
+  }
+  cx.stroke();
+  tt += speed;
+  requestAnimationFrame(draw);
+}
+draw();
+
+function tick() {
+  var d = new Date();
+  document.getElementById('time').textContent = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('date').textContent = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  document.getElementById('net').textContent = navigator.onLine ? 'ONLINE' : 'OFFLINE';
+}
+tick();
+setInterval(tick, 1000);
+
+if (navigator.getBattery) {
+  navigator.getBattery().then(function(b) {
+    function upd() { document.getElementById('bat').textContent = Math.round(b.level * 100) + '%'; }
+    upd();
+    b.addEventListener('levelchange', upd);
+  }).catch(function() {
+    document.getElementById('bat').textContent = 'N/A';
+  });
+} else {
+  document.getElementById('bat').textContent = 'N/A';
+}
+
+// ===== NORA AI AND CHAT =====
+var NORA_API = 'https://aged-disk-f3a0.pp9099034.workers.dev/chat';
+
+var voiceOn = true;
+var synth = window.speechSynthesis;
+var voices = [];
+var lang = 'hi-IN';
+var listening = false;
+var processing = false;
+var chatHistory = [];
+
+var chat = document.getElementById('chat');
+var questionInput = document.getElementById('question');
+var form = document.getElementById('chatForm');
+var micBtn = document.getElementById('mic');
+var langBtn = document.getElementById('lang');
+var voiceBtn = document.getElementById('voice');
+var infoEl = document.getElementById('info');
+
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var rec = null;
+
+function addMessage(text, type) {
+  var bubble = document.createElement('div');
+  bubble.className = 'message ' + type;
+  var label = document.createElement('div');
+  label.className = 'message-label';
+  label.textContent = type === 'user' ? 'SIR' : 'N.O.R.A.';
+  var content = document.createElement('div');
+  content.textContent = text;
+  bubble.appendChild(label);
+  bubble.appendChild(content);
+  chat.appendChild(bubble);
+  chat.scrollTop = chat.scrollHeight;
+  return bubble;
+}
+
+// Phone command ka button wala card
+function addActionCard(text, url, openNewTab) {
+  var bubble = addMessage(text, 'nora');
+  var a = document.createElement('a');
+  a.className = 'act';
+  a.href = url;
+  a.textContent = '▶ खोलें';
+  if (openNewTab) {
+    a.target = '_blank';
+    a.rel = 'noopener';
+  }
+  bubble.appendChild(a);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function loadVoices() {
+  if (!synth) return;
+  voices = synth.getVoices();
+}
+if (synth) {
+  loadVoices();
+  synth.onvoiceschanged = loadVoices;
+}
+
+function pickVoice(language) {
+  if (!synth) return null;
+  var prefix = language.slice(0, 2).toLowerCase();
+  for (var i = 0; i < voices.length; i++) {
+    if (voices[i].lang.replace('_', '-').toLowerCase() === language.toLowerCase()) return voices[i];
+  }
+  for (var j = 0; j < voices.length; j++) {
+    if (voices[j].lang.toLowerCase().startsWith(prefix)) return voices[j];
+  }
+  return null;
+}
+
+function speak(text, language) {
+  if (!synth || !voiceOn) {
+    setState('idle');
+    return;
+  }
+  synth.cancel();
+  var utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = language;
+  var selectedVoice = pickVoice(language);
+  if (selectedVoice) utterance.voice = selectedVoice;
+  utterance.rate = 0.92;
+  utterance.pitch = 1.0;
+  utterance.onstart = function() { setState('speaking'); };
+  utterance.onend = function() { if (state === 'speaking') setState('idle'); };
+  utterance.onerror = function() { if (state === 'speaking') setState('idle'); };
+  synth.speak(utterance);
+}
+
+// ===== STAGE 5: PHONE COMMANDS =====
+var ACTIONS = [
+  'kholo','kholiye','khol','open','launch','chalao','chala','play','search',
+  'dhundo','khojo','call','dial','navigate',
+  'खोलो','खोलिए','खोल','चलाओ','चला','खोजो','ढूंढो','सर्च','कॉल','डायल','लगाओ'
+];
+
+var STOP = [
+  'kholo','kholiye','khol','open','launch','chalao','chala','play','search',
+  'dhundo','khojo','karo','kar','do','de','dena','please','plz','mujhe','mera','meri',
+  'ko','ka','ki','ke','par','pe','me','mein','se','the','a','to','on','in',
+  'nora','hey','sir','kripya','zara','jara','laga','lagao','call','dial','navigate',
+  'खोलो','खोलिए','खोल','चलाओ','चला','खोजो','ढूंढो','करो','कर','दो','दे',
+  'को','का','की','के','पर','पे','में','से','मुझे','मेरा','मेरी','नोरा','सर',
+  'कृपया','लगाओ','लगा','कॉल','डायल','सर्च',
+  'youtube','यूट्यूब','युट्यूब','whatsapp','व्हाट्सएप','वाट्सएप','व्हाट्सऐप','वॉट्सऐप','वॉट्सएप',
+  'maps','map','मैप','नक्शा','रास्ता','direction','directions',
+  'google','गूगल','instagram','इंस्टाग्राम','store','स्टोर','प्ले','playstore','sms','एसएमएस'
+];
+
+function toAscii(s) {
+  return s.replace(/[०-९]/g, function(d) { return '०१२३४५६७८९'.indexOf(d); });
+}
+
+function parseCommand(raw) {
+  var t = toAscii(raw.toLowerCase());
+  var tokens = t.replace(/[.,!?।"']/g, ' ').split(/\s+/).filter(Boolean);
+
+  function has() {
+    for (var i = 0; i < arguments.length; i++) {
+      if (t.indexOf(arguments[i]) !== -1) return true;
+    }
+    return false;
+  }
+
+  var hasAction = false;
+  for (var k = 0; k < tokens.length; k++) {
+    if (ACTIONS.indexOf(tokens[k]) !== -1) { hasAction = true; break; }
+  }
+  if (!hasAction) return null;
+
+  var query = tokens.filter(function(w) { return STOP.indexOf(w) === -1; }).join(' ').trim();
+  var q = encodeURIComponent(query);
+
+  if (has('play store', 'playstore', 'प्ले स्टोर')) {
+    return { name: 'Play Store', url: query ? 'https://play.google.com/store/search?q=' + q + '&c=apps' : 'https://play.google.com/store', tab: true };
+  }
+  if (has('whatsapp', 'व्हाट्सएप', 'वाट्सएप', 'व्हाट्सऐप', 'वॉट्सऐप', 'वॉट्सएप', 'whats app')) {
+    return { name: 'WhatsApp', url: 'whatsapp://send?text=' + q, tab: false };
+  }
+  if (has('instagram', 'इंस्टाग्राम')) {
+    return { name: 'Instagram', url: 'https://www.instagram.com/', tab: true };
+  }
+  if (has('youtube', 'यूट्यूब', 'युट्यूब')) {
+    return { name: 'YouTube', url: query ? 'https://www.youtube.com/results?search_query=' + q : 'https://www.youtube.com/', tab: true };
+  }
+  if (has('maps', 'map', 'मैप', 'नक्शा', 'रास्ता', 'direction')) {
+    return { name: 'Google Maps', url: query ? 'https://www.google.com/maps/search/?api=1&query=' + q : 'https://www.google.com/maps', tab: true };
+  }
+  if (has('sms', 'एसएमएस')) {
+    return { name: 'SMS', url: 'sms:', tab: false };
+  }
+  if (has('call', 'कॉल', 'dial', 'डायल')) {
+    var digits = t.replace(/[^0-9]/g, '');
+    if (digits.length >= 3) {
+      return { name: 'Call ' + digits, url: 'tel:' + digits, tab: false };
+    }
+    return { name: 'फ़ोन डायलर', url: 'tel:', tab: false };
+  }
+  if (query && has('google', 'गूगल')) {
+    return { name: 'Google Search', url: 'https://www.google.com/search?q=' + q, tab: true };
+  }
+  return null;
+}
+
+function handleCommand(cmd) {
+  var msgText = lang === 'hi-IN'
+    ? 'ठीक है Sir, ' + cmd.name + ' खोलने के लिए नीचे का बटन दबाइए।'
+    : 'Okay Sir, tap the button below to open ' + cmd.name + '.';
+
+  addActionCard(msgText, cmd.url, cmd.tab);
+  infoEl.textContent = cmd.name + ' तैयार है। बटन दबाइए।';
+  speak(msgText, lang);
+}
+
+// Question ko Cloudflare AI ke paas bhejna (history ke saath)
+async function askNora(text) {
+  var response = await fetch(NORA_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: text,
+      language: lang === 'hi-IN' ? 'hi' : 'en',
+      history: chatHistory.slice(-10)
+    })
+  });
+
+  var data = await response.json();
+
+  if (!response.ok || !data.success || !data.reply) {
+    throw new Error(data.error || 'NORA AI response nahi mila.');
+  }
+  return data.reply;
+}
+
+async function processQuestion(text) {
+  text = text.trim();
+  if (!text || processing) return;
+
+  if (synth) synth.cancel();
+
+  addMessage(text, 'user');
+
+  // Pehle check: kya yeh phone command hai?
+  var cmd = parseCommand(text);
+  if (cmd) {
+    handleCommand(cmd);
+    return;
+  }
+
+  processing = true;
+  questionInput.disabled = true;
+  micBtn.disabled = true;
+  document.getElementById('send').disabled = true;
+
+  setState('thinking');
+  infoEl.textContent = 'NORA आपके प्रश्न पर विचार कर रही है...';
+
+  var pending = addMessage('कृपया प्रतीक्षा करें...', 'nora');
+
+  try {
+    var answer = await askNora(text);
+
+    pending.remove();
+    addMessage(answer, 'nora');
+
+    chatHistory.push({ role: 'user', text: text });
+    chatHistory.push({ role: 'model', text: answer });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
+    infoEl.textContent = 'NORA ने उत्तर दे दिया है।';
+    speak(answer, lang);
+
+  } catch (error) {
+    console.error('NORA AI Error:', error);
+    pending.remove();
+    addMessage('क्षमा कीजिए Sir, अभी AI सेवा से संपर्क नहीं हो पाया। कृपया इंटरनेट जाँचकर दोबारा प्रयास करें।', 'nora');
+    infoEl.textContent = 'AI error: ' + (error && error.message ? error.message : error);
+    setState('idle');
+
+  } finally {
+    processing = false;
+    questionInput.disabled = false;
+    micBtn.disabled = false;
+    document.getElementById('send').disabled = false;
+    questionInput.focus();
+  }
+}
+
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (processing) return;
+  var text = questionInput.value.trim();
+  if (!text) return;
+  questionInput.value = '';
+  processQuestion(text);
+});
+
+// Microphone
+if (!SR) {
+  micBtn.disabled = true;
+  infoEl.textContent = 'इस ब्राउज़र में वॉइस पहचान उपलब्ध नहीं है। Chrome में प्रयास करें।';
+} else {
+  rec = new SR();
+  rec.interimResults = true;
+  rec.continuous = false;
+
+  rec.onstart = function() {
+    listening = true;
+    micBtn.classList.add('on');
+    setState('listening');
+    infoEl.textContent = 'NORA सुन रही है, Sir...';
+  };
+
+  rec.onresult = function(e) {
+    var finalText = '';
+    var interimText = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+      else interimText += e.results[i][0].transcript;
+    }
+    if (interimText) infoEl.textContent = 'सुना जा रहा है: ' + interimText;
+    if (finalText.trim()) processQuestion(finalText.trim());
+  };
+
+  rec.onerror = function(e) {
+    var errors = {
+      'not-allowed': 'Sir, माइक्रोफ़ोन की अनुमति दीजिए।',
+      'no-speech': 'कोई आवाज़ सुनाई नहीं दी। दोबारा प्रयास करें।',
+      'network': 'इंटरनेट कनेक्शन जाँचिए।',
+      'audio-capture': 'माइक्रोफ़ोन उपलब्ध नहीं है।'
+    };
+    infoEl.textContent = errors[e.error] || ('Microphone error: ' + e.error);
+    setState('idle');
+  };
+
+  rec.onend = function() {
+    listening = false;
+    micBtn.classList.remove('on');
+    if (state === 'listening') setState('idle');
+  };
+}
+
+micBtn.addEventListener('click', function() {
+  if (!rec || processing) return;
+  if (listening) { rec.stop(); return; }
+  if (synth) synth.cancel();
+  rec.lang = lang;
+  try {
+    rec.start();
+  } catch (error) {
+    infoEl.textContent = 'माइक्रोफ़ोन शुरू नहीं हो पाया। पुनः प्रयास करें।';
+  }
+});
+
+langBtn.addEventListener('click', function() {
+  if (lang === 'hi-IN') {
+    lang = 'en-IN';
+    langBtn.textContent = 'Language: English';
+    questionInput.placeholder = 'Type your message...';
+    infoEl.textContent = 'English mode selected.';
+  } else {
+    lang = 'hi-IN';
+    langBtn.textContent = 'भाषा: हिन्दी';
+    questionInput.placeholder = 'यहाँ अपना संदेश लिखें...';
+    infoEl.textContent = 'हिन्दी मोड चुना गया है।';
+  }
+  if (rec) rec.lang = lang;
+});
+
+document.getElementById('greet').addEventListener('click', function() {
+  var greeting = lang === 'hi-IN'
+    ? 'नमस्कार Sir! मैं NORA हूँ। मैं आपकी सहायता के लिए तैयार हूँ।'
+    : 'Hello Sir! I am NORA, your personal AI assistant. How may I help you today?';
+  addMessage(greeting, 'nora');
+  speak(greeting, lang);
+});
+
+voiceBtn.addEventListener('click', function() {
+  voiceOn = !voiceOn;
+  voiceBtn.textContent = voiceOn ? '🔊 आवाज़: ON' : '🔇 आवाज़: OFF';
+  if (!voiceOn && synth) {
+    synth.cancel();
+    setState('idle');
+  }
+  infoEl.textContent = voiceOn ? 'आवाज़ चालू है।' : 'आवाज़ बंद है। उत्तर लिखकर दिखाई देंगे।';
+});
+
+document.getElementById('reset').addEventListener('click', function() {
+  if (synth) synth.cancel();
+  chatHistory = [];
+  chat.innerHTML = '';
+  addMessage('नई बातचीत शुरू हो गई, Sir। बताइए, मैं क्या कर सकती हूँ?', 'nora');
+  infoEl.textContent = 'पुरानी बातें हटा दी गईं।';
+  setState('idle');
+});
 </script>
+
 </body>
 </html>
