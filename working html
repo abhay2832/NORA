@@ -32,6 +32,7 @@ canvas { width: 100%; max-width: 340px; height: 55px; }
 .message.user { align-self: flex-end; color: #e7ffff; background: #006d8888; border: 1px solid #00e5ff66; border-bottom-right-radius: 3px; }
 .message.nora { align-self: flex-start; color: #a8faff; background: #00e5ff12; border: 1px solid #00e5ff55; border-bottom-left-radius: 3px; }
 .message-label { font-size: 10px; opacity: .65; margin-bottom: 4px; letter-spacing: 1px; }
+.act { display: inline-block; margin-top: 8px; padding: 9px 18px; border: 1px solid #00e5ff; border-radius: 20px; color: #dfffff; background: #00e5ff33; text-decoration: none; font-size: 14px; box-shadow: 0 0 12px #00e5ff55; }
 .composer { width: 100%; max-width: 420px; display: flex; align-items: center; gap: 7px; margin-top: 12px; padding: 7px; border: 1px solid #00e5ff88; border-radius: 30px; background: #001522; box-shadow: 0 0 14px #00e5ff22; }
 #question { min-width: 0; flex: 1; background: transparent; color: #dfffff; border: none; outline: none; padding: 10px 8px; font-size: 14px; }
 #question::placeholder { color: #7df9ff88; }
@@ -168,7 +169,7 @@ var voices = [];
 var lang = 'hi-IN';
 var listening = false;
 var processing = false;
-var chatHistory = [];   // pichli baatein (context)
+var chatHistory = [];
 
 var chat = document.getElementById('chat');
 var questionInput = document.getElementById('question');
@@ -194,6 +195,21 @@ function addMessage(text, type) {
   chat.appendChild(bubble);
   chat.scrollTop = chat.scrollHeight;
   return bubble;
+}
+
+// Phone command ka button wala card
+function addActionCard(text, url, openNewTab) {
+  var bubble = addMessage(text, 'nora');
+  var a = document.createElement('a');
+  a.className = 'act';
+  a.href = url;
+  a.textContent = '▶ खोलें';
+  if (openNewTab) {
+    a.target = '_blank';
+    a.rel = 'noopener';
+  }
+  bubble.appendChild(a);
+  chat.scrollTop = chat.scrollHeight;
 }
 
 function loadVoices() {
@@ -235,6 +251,91 @@ function speak(text, language) {
   synth.speak(utterance);
 }
 
+// ===== STAGE 5: PHONE COMMANDS =====
+var ACTIONS = [
+  'kholo','kholiye','khol','open','launch','chalao','chala','play','search',
+  'dhundo','khojo','call','dial','navigate',
+  'खोलो','खोलिए','खोल','चलाओ','चला','खोजो','ढूंढो','सर्च','कॉल','डायल','लगाओ'
+];
+
+var STOP = [
+  'kholo','kholiye','khol','open','launch','chalao','chala','play','search',
+  'dhundo','khojo','karo','kar','do','de','dena','please','plz','mujhe','mera','meri',
+  'ko','ka','ki','ke','par','pe','me','mein','se','the','a','to','on','in',
+  'nora','hey','sir','kripya','zara','jara','laga','lagao','call','dial','navigate',
+  'खोलो','खोलिए','खोल','चलाओ','चला','खोजो','ढूंढो','करो','कर','दो','दे',
+  'को','का','की','के','पर','पे','में','से','मुझे','मेरा','मेरी','नोरा','सर',
+  'कृपया','लगाओ','लगा','कॉल','डायल','सर्च',
+  'youtube','यूट्यूब','युट्यूब','whatsapp','व्हाट्सएप','वाट्सएप','व्हाट्सऐप','वॉट्सऐप','वॉट्सएप',
+  'maps','map','मैप','नक्शा','रास्ता','direction','directions',
+  'google','गूगल','instagram','इंस्टाग्राम','store','स्टोर','प्ले','playstore','sms','एसएमएस'
+];
+
+function toAscii(s) {
+  return s.replace(/[०-९]/g, function(d) { return '०१२३४५६७८९'.indexOf(d); });
+}
+
+function parseCommand(raw) {
+  var t = toAscii(raw.toLowerCase());
+  var tokens = t.replace(/[.,!?।"']/g, ' ').split(/\s+/).filter(Boolean);
+
+  function has() {
+    for (var i = 0; i < arguments.length; i++) {
+      if (t.indexOf(arguments[i]) !== -1) return true;
+    }
+    return false;
+  }
+
+  var hasAction = false;
+  for (var k = 0; k < tokens.length; k++) {
+    if (ACTIONS.indexOf(tokens[k]) !== -1) { hasAction = true; break; }
+  }
+  if (!hasAction) return null;
+
+  var query = tokens.filter(function(w) { return STOP.indexOf(w) === -1; }).join(' ').trim();
+  var q = encodeURIComponent(query);
+
+  if (has('play store', 'playstore', 'प्ले स्टोर')) {
+    return { name: 'Play Store', url: query ? 'https://play.google.com/store/search?q=' + q + '&c=apps' : 'https://play.google.com/store', tab: true };
+  }
+  if (has('whatsapp', 'व्हाट्सएप', 'वाट्सएप', 'व्हाट्सऐप', 'वॉट्सऐप', 'वॉट्सएप', 'whats app')) {
+    return { name: 'WhatsApp', url: 'whatsapp://send?text=' + q, tab: false };
+  }
+  if (has('instagram', 'इंस्टाग्राम')) {
+    return { name: 'Instagram', url: 'https://www.instagram.com/', tab: true };
+  }
+  if (has('youtube', 'यूट्यूब', 'युट्यूब')) {
+    return { name: 'YouTube', url: query ? 'https://www.youtube.com/results?search_query=' + q : 'https://www.youtube.com/', tab: true };
+  }
+  if (has('maps', 'map', 'मैप', 'नक्शा', 'रास्ता', 'direction')) {
+    return { name: 'Google Maps', url: query ? 'https://www.google.com/maps/search/?api=1&query=' + q : 'https://www.google.com/maps', tab: true };
+  }
+  if (has('sms', 'एसएमएस')) {
+    return { name: 'SMS', url: 'sms:', tab: false };
+  }
+  if (has('call', 'कॉल', 'dial', 'डायल')) {
+    var digits = t.replace(/[^0-9]/g, '');
+    if (digits.length >= 3) {
+      return { name: 'Call ' + digits, url: 'tel:' + digits, tab: false };
+    }
+    return { name: 'फ़ोन डायलर', url: 'tel:', tab: false };
+  }
+  if (query && has('google', 'गूगल')) {
+    return { name: 'Google Search', url: 'https://www.google.com/search?q=' + q, tab: true };
+  }
+  return null;
+}
+
+function handleCommand(cmd) {
+  var msgText = lang === 'hi-IN'
+    ? 'ठीक है Sir, ' + cmd.name + ' खोलने के लिए नीचे का बटन दबाइए।'
+    : 'Okay Sir, tap the button below to open ' + cmd.name + '.';
+
+  addActionCard(msgText, cmd.url, cmd.tab);
+  infoEl.textContent = cmd.name + ' तैयार है। बटन दबाइए।';
+  speak(msgText, lang);
+}
+
 // Question ko Cloudflare AI ke paas bhejna (history ke saath)
 async function askNora(text) {
   var response = await fetch(NORA_API, {
@@ -263,6 +364,13 @@ async function processQuestion(text) {
 
   addMessage(text, 'user');
 
+  // Pehle check: kya yeh phone command hai?
+  var cmd = parseCommand(text);
+  if (cmd) {
+    handleCommand(cmd);
+    return;
+  }
+
   processing = true;
   questionInput.disabled = true;
   micBtn.disabled = true;
@@ -279,7 +387,6 @@ async function processQuestion(text) {
     pending.remove();
     addMessage(answer, 'nora');
 
-    // Baat-cheet yaad rakhna
     chatHistory.push({ role: 'user', text: text });
     chatHistory.push({ role: 'model', text: answer });
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
@@ -402,7 +509,6 @@ voiceBtn.addEventListener('click', function() {
   infoEl.textContent = voiceOn ? 'आवाज़ चालू है।' : 'आवाज़ बंद है। उत्तर लिखकर दिखाई देंगे।';
 });
 
-// Nayi baatcheet: history aur chat saaf
 document.getElementById('reset').addEventListener('click', function() {
   if (synth) synth.cancel();
   chatHistory = [];
